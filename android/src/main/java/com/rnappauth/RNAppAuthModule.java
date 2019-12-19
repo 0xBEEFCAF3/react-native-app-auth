@@ -335,7 +335,12 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
             };
 
             if (this.clientSecret != null) {
-                ClientAuthentication clientAuth = this.getClientAuthentication(this.clientSecret, this.clientAuthMethod);
+                ClientAuthentication clientAuth;
+                if (this.additionalParametersMap.containsKey("shouldPostAuth")){
+                    clientAuth = new ClientSecretPost(clientSecret);
+                } else {
+                    clientAuth = new ClientSecretBasic(clientSecret);
+                }
                 authService.performTokenRequest(tokenRequest, clientAuth, tokenResponseCallback);
 
             } else {
@@ -475,9 +480,12 @@ public class RNAppAuthModule extends ReactContextBaseJavaModule implements Activ
 
 
         if (clientSecret != null) {
-            ClientAuthentication clientAuth = this.getClientAuthentication(clientSecret, clientAuthMethod);
-            authService.performTokenRequest(tokenRequest, clientAuth, tokenResponseCallback);
-
+            ClientAuthentication clientAuth;
+            if (this.additionalParametersMap.containsKey("shouldPostAuth")){
+                clientAuth = new ClientSecretPost(this.clientSecret);
+            } else {
+                clientAuth = new ClientSecretBasic(this.clientSecret);
+            }
         } else {
             authService.performTokenRequest(tokenRequest, tokenResponseCallback);
         }
